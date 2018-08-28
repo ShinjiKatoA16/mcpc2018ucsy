@@ -22,4 +22,4 @@ for _ in range(num_tc):
         found += 1
         f_pos.append(str(p_idx))
     print(found)
-    print(' '.join(f_pos))
+    if found: print(' '.join(f_pos))
