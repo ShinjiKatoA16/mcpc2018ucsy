@@ -3,7 +3,7 @@
 
 import sys
 
-MAX_N = 1000
+MAX_N = 1000+1
 def sieve():
     primes = list()
     perfects = list()
