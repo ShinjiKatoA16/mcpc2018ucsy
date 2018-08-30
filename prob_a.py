@@ -38,6 +38,16 @@ def init_edges(min_x, max_x, min_y, max_y, jams):
     return edges
 
 
+def update_pq(edge, x, y, pq, weight, temp_dist):
+    if edge == None: return
+
+    next_node = (x,y)
+    new_weight = edge + weight ;
+    if new_weight < temp_dist[next_node]:
+        heappush(pq, (new_weight, next_node))
+        temp_dist[next_node] = new_weight
+    return
+
 def eval_node(node, weight, pq, distance ,temp_dist, edges):
     #print('Node:', node, 'evaluated', weight, file=sys.stderr)
     temp_dist[node] = distance[node] = weight
@@ -45,34 +55,10 @@ def eval_node(node, weight, pq, distance ,temp_dist, edges):
     right, left, up, down = edges[node]
     x, y = node
 
-    if right != None:
-        next_node = (x+1, y)
-        new_weight = weight + right
-        if new_weight < temp_dist[next_node]:
-            heappush(pq, (new_weight, next_node))
-            temp_dist[next_node] = new_weight
-
-    if left != None:
-        next_node = (x-1, y)
-        new_weight = weight + left 
-        if new_weight < temp_dist[next_node]:
-            heappush(pq, (new_weight, next_node))
-            temp_dist[next_node] = new_weight
-
-    if up != None:
-        next_node = (x, y+1)
-        new_weight = weight + up
-        if new_weight < temp_dist[next_node]:
-            heappush(pq, (new_weight, next_node))
-            temp_dist[next_node] = new_weight
-
-    if down != None:
-        next_node = (x, y-1)
-        new_weight = weight + down
-        if new_weight < temp_dist[next_node]:
-            heappush(pq, (new_weight, next_node))
-            temp_dist[next_node] = new_weight
-    
+    update_pq(right, x+1, y, pq, weight, temp_dist)
+    update_pq(left, x-1, y, pq, weight, temp_dist)
+    update_pq(up, x, y+1, pq, weight, temp_dist)
+    update_pq(down, x, y-1, pq, weight, temp_dist)
 
 def dijkstra(src, dest, edges):
     '''
