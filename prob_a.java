@@ -2,27 +2,28 @@
 
 import java.util.Scanner ;
 import java.util.PriorityQueue ;
+import java.util.HashMap ;
 
 class prob_a {
 
     static final long INF = 1000000000000000000L ;  // 10**18
     static final int DEFAULT_EDGE = 10 ;
 
-    static int [][][] init_edge(int min_x, int max_x, int min_y, int max_y, int num_jam, int [][] jams) {
+    static HashMap<String,Integer> init_edge(int min_x, int max_x, int min_y, int max_y, int num_jam, int [][] jams) {
         // Return edge[x][y][direction], which contains t value of jams
-        int edge[][][] = new int [max_x-min_x+1][max_y-min_y+1][4] ;
+        HashMap<String,Integer> edge = new HashMap<String,Integer>() ;
 
         for (int x = min_x; x <= max_x; x++) {
-            for (int y = min_y; y <= max_y; y++) {
-                if (x == max_x) edge[x-min_x][y-min_y][0] = -1 ;  // right
-                else edge[x-min_x][y-min_y][0] = DEFAULT_EDGE ;
-                if (x == min_x) edge[x-min_x][y-min_y][1] = -1 ;  // left
-                else edge[x-min_x][y-min_y][1] = DEFAULT_EDGE ;
-                if (y == max_y) edge[x-min_x][y-min_y][2] = -1 ;  // up
-                else edge[x-min_x][y-min_y][2] = DEFAULT_EDGE ;
-                if (y == min_y) edge[x-min_x][y-min_y][3] = -1 ;  // down
-                else edge[x-min_x][y-min_y][3] = DEFAULT_EDGE ;
-            }
+            String key_down = "down:"+x+":"+min_y ;
+            String key_up = "up:"+x+":"+max_y ;
+            edge.put(key_down, -1) ;
+            edge.put(key_up, -1) ;
+        }
+        for (int y = min_y; y <= max_y; y++) {
+            String key_right = "right:"+max_x+":"+y ;
+            String key_left = "left:"+min_x+":"+y ;
+            edge.put(key_right, -1) ;
+            edge.put(key_left, -1) ;
         }
 
         for (int jam=0; jam < num_jam; jam++) {
@@ -30,8 +31,10 @@ class prob_a {
             for (int y = jams[jam][1]+1; y < jams[jam][3]; y++) {
                 // include x1, exclude x2
                 for (int x = jams[jam][0]; x < jams[jam][2]; x++) {
-                    edge[x-min_x][y-min_y][0] = jams[jam][4] ;
-                    edge[x-min_x+1][y-min_y][1] = jams[jam][4] ;
+                    String key_right = "right:"+x+":"+y ;
+                    String key_left = "left:"+(x+1)+":"+y ;
+                    edge.put(key_right, jams[jam][4]) ;
+                    edge.put(key_left, jams[jam][4]) ;
                 }
             }
 
@@ -39,8 +42,10 @@ class prob_a {
             for (int x = jams[jam][0]+1; x < jams[jam][2]; x++) {
                 // include y1, exclude y2
                 for (int y = jams[jam][1]; y < jams[jam][3]; y++) {
-                    edge[x-min_x][y-min_y][2] = jams[jam][4] ;
-                    edge[x-min_x][y-min_y+1][3] = jams[jam][4] ;
+                    String key_up = "up:"+x+":"+y ;
+                    String key_down = "down:"+x+":"+(y+1) ;
+                    edge.put(key_up, jams[jam][4]) ;
+                    edge.put(key_down, jams[jam][4]) ;
                 }
             }
         }
@@ -59,15 +64,19 @@ class prob_a {
     }
 
     static void eval_node(PQ_obj pq_obj, PriorityQueue<PQ_obj> pq, long [][]distance,
-                long [][]tmp_dist, int [][][]edges, int min_x, int min_y) {
+                long [][]tmp_dist, HashMap<String,Integer> edges, int min_x, int min_y) {
 
         distance[pq_obj.x-min_x][pq_obj.y-min_y] = pq_obj.weight ;
         tmp_dist[pq_obj.x-min_x][pq_obj.y-min_y] = pq_obj.weight ;
 
-        int right = edges[pq_obj.x-min_x][pq_obj.y-min_y][0] ;
-        int left = edges[pq_obj.x-min_x][pq_obj.y-min_y][1] ;
-        int up = edges[pq_obj.x-min_x][pq_obj.y-min_y][2] ;
-        int down = edges[pq_obj.x-min_x][pq_obj.y-min_y][3] ;
+        String key_right = "right:"+pq_obj.x+":"+pq_obj.y ;
+        String key_left = "left:"+pq_obj.x+":"+pq_obj.y ;
+        String key_up = "up:"+pq_obj.x+":"+pq_obj.y ;
+        String key_down = "down:"+pq_obj.x+":"+pq_obj.y ;
+        int right = edges.containsKey(key_right)?edges.get(key_right):DEFAULT_EDGE ;
+        int left = edges.containsKey(key_left)?edges.get(key_left):DEFAULT_EDGE ;
+        int up = edges.containsKey(key_up)?edges.get(key_up):DEFAULT_EDGE ;
+        int down = edges.containsKey(key_down)?edges.get(key_down):DEFAULT_EDGE ;
 
         update_pq(right, pq_obj.x+1, pq_obj.y, pq_obj.weight, pq, tmp_dist, min_x, min_y) ;
         update_pq(left, pq_obj.x-1, pq_obj.y, pq_obj.weight, pq, tmp_dist, min_x, min_y) ;
@@ -78,7 +87,7 @@ class prob_a {
 
 
     static void dijkstra(int src_x, int src_y, int dest_x, int dest_y,
-           int min_x, int max_x, int min_y, int max_y, int [][][]edges) {
+           int min_x, int max_x, int min_y, int max_y, HashMap<String,Integer> edges) {
 
         long [][] distance = new long [max_x-min_x+1][max_y-min_y+1] ;
         long [][] tmp_dist = new long [max_x-min_x+1][max_y-min_y+1] ;
@@ -148,7 +157,7 @@ class prob_a {
             }
 
 
-            int [][][] edges = init_edge(min_x, max_x, min_y, max_y, num_jam, jams) ;
+            HashMap<String,Integer> edges = init_edge(min_x, max_x, min_y, max_y, num_jam, jams) ;
             dijkstra(src_x, src_y, dest_x, dest_y, min_x, max_x, min_y, max_y, edges) ;
         }
     }
