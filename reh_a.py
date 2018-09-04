@@ -8,16 +8,11 @@ import sys
 
 def arm_strong(n):
     total = 0
-    number = n
-    while number>0:
-        digit = number % 10
+    numbers = map(int, list(str(n)))
+    for digit in numbers:
         total += digit**3
-        number //= 10
 
-    if (total == n):
-        return 1
-    else:
-        return 0
+    return(1 if total==n else 0)
 
 
 num_tc = int(sys.stdin.readline())
