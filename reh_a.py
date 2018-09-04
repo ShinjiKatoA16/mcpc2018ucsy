@@ -6,17 +6,17 @@
 
 import sys
 
-def arm_strong(n):
+def arm_strong(s):
     total = 0
-    numbers = map(int, list(str(n)))
+    numbers = map(int, s)   # map() will apply int() to each digit in s
     for digit in numbers:
         total += digit**3
 
-    return(1 if total==n else 0)
+    return(1 if total==int(s) else 0)
 
 
 num_tc = int(sys.stdin.readline())
 for tc in range(num_tc):
-    n = int(sys.stdin.readline())
-    print(arm_strong(n))
+    s = sys.stdin.readline().strip()  # pass as string, remove \n
+    print(arm_strong(s))
 
